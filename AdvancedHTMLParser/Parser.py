@@ -470,9 +470,9 @@ class AdvancedHTMLParser(HTMLParser):
         else:
             self.feed(html)
 
-    def filter(self, **kwargs):
+    def find(self, **kwargs):
         '''
-            filter - Perform a search of elements using kwargs to filter.
+            find - Perform a search of elements using kwargs to filter.
 
             Arguments are key = value, or key can equal a tuple/list of values to match ANY of those values.
 
@@ -486,18 +486,10 @@ class AdvancedHTMLParser(HTMLParser):
 
             @return TagCollection<AdvancedTag> - A list of tags that matched the filter criteria
 
-            TODO: Should support testing against None to to test if an attribute is unset (or maybe just
-              empty string, which should already work, would be enough?)
+            NOTE: Empty string means both "not set" and "no value" in this implementation.
+             7.0.0 will have a more full implementation, but will require an additional optional
+             python package (QueryableList) to be installed to use it.
 
-            TODO: This would be useful to move onto TagCollection, and have the parser impl gather a TagCollection
-              of every element, have AdvancedTags gather just their children, etc. That way it can be chained, or
-              performed against a smaller subset.
-
-            TODO: This could also be used to implement a "document.all" like thing, where it filters by id first and
-              if no results, then name.
-
-            TODO: Investigate if there's a simple way to extend QueryableList so we can have automatic usage of all
-              those special __ things. Actually, this SHOULD be done, we just need to extend and implement one function...
         '''
 
         if not kwargs:
