@@ -472,7 +472,10 @@ class AdvancedHTMLParser(HTMLParser):
 
     def find(self, **kwargs):
         '''
-            find - Perform a search of elements using kwargs to filter.
+            find - Perform a search of elements using attributes as keys and potential values as values
+            
+               (i.e.  parser.find(name='blah', tagname='span')  will return all elements in this document
+                 with the name "blah" of the tag type "span" )
 
             Arguments are key = value, or key can equal a tuple/list of values to match ANY of those values.
 
@@ -487,7 +490,9 @@ class AdvancedHTMLParser(HTMLParser):
             @return TagCollection<AdvancedTag> - A list of tags that matched the filter criteria
 
             NOTE: Empty string means both "not set" and "no value" in this implementation.
-             7.0.0 will have a more full implementation, but will require an additional optional
+
+            NOTE: 7.0.0 will have a more full implementation (filter methods),
+             but these will require an additional optional
              python package (QueryableList) to be installed to use it.
 
         '''
@@ -534,10 +539,6 @@ class AdvancedHTMLParser(HTMLParser):
                 return lambda em : _value in em.text
             else:
                 _value = _value.lower()
-#                def f(em):
-#                    import pdb; pdb.set_trace()
-#                    return _value in em.text.lower()
-#                return f
                 return lambda em : _value in em.text.lower()
 
         def _makeAttributeContainsInLambda(_key, _values, icontains=False):
@@ -585,15 +586,12 @@ class AdvancedHTMLParser(HTMLParser):
             endsIContains = key.endswith('__icontains')
             endsContains = key.endswith('__contains')
 
-            print ( "Key %s icontains? %s %s" %(key, endsIContains, endsContains))
-
             isValueList = isinstance(value, (list, tuple))
 
             thisFunc = None
 
             if endsIContains or endsContains:
                 key = re.sub('__[i]{0,1}contains$', '', key)
-                print ( "Key after: " + key )
                 if key == 'tagname':
                     raise ValueError('tagname is not supported for contains')
 
@@ -629,8 +627,10 @@ class AdvancedHTMLParser(HTMLParser):
 
             matchFunctions.append( thisFunc )
 
+        # The actual matching function - This will run through the assembled
+        #  #matchFunctions list, testing the element against each match
+        #  and returning all elements in a TagCollection that match this list.
         def doMatchFunc(em):
-            #import pdb; pdb.set_trace()
             for matchFunction in matchFunctions:
                 if matchFunction(em) is False:
                     return False
